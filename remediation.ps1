@@ -5,7 +5,7 @@ try {
     $oneDriveExe = "C:\Program Files\Microsoft OneDrive\OneDrive.exe"
 
     #write last user folder path to console
-    Write-Host "Last User Folder: $lastUserFolder"
+    Write-Output "Last User Folder: $lastUserFolder"
 
     # Check if the oneDriveExe exists for the last logged on user
     if (-Not (Test-Path $oneDriveExe)) {
@@ -31,10 +31,10 @@ try {
     # Start the scheduled task
     Start-ScheduledTask -TaskName "LaunchOneDriveForUser"
 
-    #write hostname and username and compliance state to write-host, which will be output to the agent log
-    Write-Host "Hostname: $env:computername"
-    Write-Host "Username: $env:username"
-    Write-Host "Compliance: Non-Compliant"
+    #write hostname and username and compliance state to Write-Output, which will be output to the agent log
+    Write-Output "Hostname: $env:computername"
+    Write-Output "Username: $env:username"
+    Write-Output "Compliance: Non-Compliant"
 
     # Message to show to the user
     Add-Type -AssemblyName PresentationFramework
