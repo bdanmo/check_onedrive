@@ -13,7 +13,8 @@ try {
     #check if one drive exe is in programfiles or $lastUserFolder\AppData\Local\Microsoft\OneDrive\OneDrive.exe, if not in either, exit 1
     $oneDriveExe = "$lastUserFolder\AppData\Local\Microsoft\OneDrive\OneDrive.exe"
     if (-Not (Test-Path $oneDriveExe)) {
-        $oneDriveExe = "$env:ProgramFiles\Microsoft OneDrive\OneDrive.exe"
+        Write-Output "OneDrive.exe not found in $lastUserFolder, checking Program Files"
+        $oneDriveExe = "C:\Program Files\Microsoft OneDrive\OneDrive.exe"
     } 
     
     if (-Not (Test-Path $oneDriveExe)) {
