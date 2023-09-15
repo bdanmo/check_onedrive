@@ -10,7 +10,6 @@ try {
     # Check if the oneDriveExe exists for the last logged on user
     if (-Not (Test-Path $oneDriveExe)) {
         Write-Error "OneDrive.exe not found for user $lastUser"
-        Read-Host -Prompt "Press Enter to exit"
         exit 1
     }
 
@@ -44,7 +43,6 @@ try {
     Exit 0
 } catch {
     Write-Error $_.Exception.Message
-    Read-Host -Prompt "Press Enter to exit"
     exit 1
 }
 
