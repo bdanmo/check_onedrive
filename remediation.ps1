@@ -1,7 +1,17 @@
 # Get the last logged on user's name and folder
 $lastUser = Get-WmiObject -Class Win32_ComputerSystem | Select-Object -ExpandProperty UserName
 $lastUserFolder = "C:\users\" + ($lastUser.Split("\")[1])
-$oneDriveExe = "$lastUserFolder\AppData\Local\Microsoft\OneDrive\OneDrive.exe"
+$oneDriveExe = "C:\Program Files\Microsoft OneDrive\OneDrive.exe"
+
+#write last user folder path to console
+Write-Host "Last User Folder: $lastUserFolder"
+
+# Check if the oneDriveExe exists for the last logged on user
+if (-Not (Test-Path $oneDriveExe)) {
+    Write-Error "OneDrive.exe not found for user $lastUser"
+    Read-Host -Prompt "Press Enter to exit"
+    exit 1
+}
 
 # Define the scheduled task action to start OneDrive
 $action = New-ScheduledTaskAction -Execute $oneDriveExe
@@ -9,8 +19,11 @@ $action = New-ScheduledTaskAction -Execute $oneDriveExe
 # Set the task to run as the logged-in user, and run immediately
 $principal = New-ScheduledTaskPrincipal -UserId $lastUser -LogonType Interactive
 
-# Define the trigger to start daily at 2pm and repeat for 7 days
-$trigger = New-ScheduledTaskTrigger -Daily -At 2pm -RepetitionInterval ([TimeSpan]::FromDays(1)) -RepetitionDuration ([TimeSpan]::FromDays(7))
+# Define the trigger to start at 2pm and repeat every 24 hours for 7 days
+# Define the trigger to start daily at 2pm
+$endDate = (Get-Date).AddDays(7).ToString('s')
+$trigger = New-ScheduledTaskTrigger -Daily -At 2pm
+$trigger.EndBoundary = $endDate
 
 # Register (create) the scheduled task
 Register-ScheduledTask -Action $action -Principal $principal -Trigger $trigger -TaskName "LaunchOneDriveForUser" -Force
