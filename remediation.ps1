@@ -1,17 +1,31 @@
 try {
     # Get the last logged on user's name and folder
-    $lastUser = Get-WmiObject -Class Win32_ComputerSystem | Select-Object -ExpandProperty UserName
-    $lastUserFolder = "C:\users\" + ($lastUser.Split("\")[1])
-    $oneDriveExe = "C:\Program Files\Microsoft OneDrive\OneDrive.exe"
+    $lastUser = Get-WmiObject -Class Win32_UserProfile | Where-Object { $_.Special -eq $false } | Sort-Object LastUseTime -Descending | Select-Object -First 1 -ExpandProperty LocalPath | Split-Path -Leaf
 
-    #write last user folder path to console
+    # if no last user, exit 1
+    if ($null -eq $lastUser) {
+        Write-Error "No last user found"
+        exit 1
+    }
+    
+    $lastUserFolder = "C:\users\" + ($lastUser.Split("\")[1])
+
+    #check if one drive exe is in programfiles or $lastUserFolder\AppData\Local\Microsoft\OneDrive\OneDrive.exe, if not in either, exit 1
+    $oneDriveExe = "$lastUserFolder\AppData\Local\Microsoft\OneDrive\OneDrive.exe"
+    if (-Not (Test-Path $oneDriveExe)) {
+        $oneDriveExe = "$env:ProgramFiles\Microsoft OneDrive\OneDrive.exe"
+    } 
+    
+    if (-Not (Test-Path $oneDriveExe)) {
+        Write-Error "OneDrive.exe not found"
+        exit 1
+    }
+
+    Write-Output "OneDrive.exe: $oneDriveExe"
     Write-Output "Last User Folder: $lastUserFolder"
 
     # Check if the oneDriveExe exists for the last logged on user
-    if (-Not (Test-Path $oneDriveExe)) {
-        Write-Error "OneDrive.exe not found for user $lastUser"
-        exit 1
-    }
+    
 
     # Define the scheduled task action to start OneDrive
     $action = New-ScheduledTaskAction -Execute $oneDriveExe
